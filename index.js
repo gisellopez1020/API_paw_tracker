@@ -18,9 +18,34 @@ let lastLocation = null;
 
 app.post("/update-location", (req, res) => {
   try {
-    console.log("Ubicación recibida:", req.body);
-    lastLocation = req.body;
-    res.status(200).json({ message: "Ubicación actualizada correctamente" });
+    const { latitude, longitude, timestamp } = req.body;
+
+    // Validación de datos
+    if (latitude === undefined || longitude === undefined) {
+      console.error("Datos de ubicación incompletos:", req.body);
+      return res
+        .status(400)
+        .json({ error: "Se requieren latitude y longitude" });
+    }
+
+    console.log("Nueva ubicación recibida:", {
+      latitude,
+      longitude,
+      timestamp,
+      receivedAt: new Date().toISOString(),
+    });
+
+    lastLocation = {
+      latitude,
+      longitude,
+      timestamp,
+      receivedAt: new Date().toISOString(),
+    };
+
+    res.status(200).json({
+      message: "Ubicación actualizada correctamente",
+      location: lastLocation,
+    });
   } catch (error) {
     console.error("Error al actualizar ubicación:", error);
     res.status(500).json({ error: error.message });
@@ -29,6 +54,12 @@ app.post("/update-location", (req, res) => {
 
 app.get("/", (req, res) => {
   try {
+    if (!lastLocation) {
+      console.log("No hay ubicación disponible");
+      return res.status(404).json({ error: "No hay ubicación disponible" });
+    }
+
+    console.log("Enviando última ubicación:", lastLocation);
     res.json(lastLocation);
   } catch (error) {
     console.error("Error al obtener ubicación:", error);
@@ -36,11 +67,18 @@ app.get("/", (req, res) => {
   }
 });
 
+// Middleware para logging de todas las peticiones
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Error en el servidor:", err.stack);
   res.status(500).json({ error: "Algo salió mal!" });
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://192.168.1.3:${PORT}`);
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log("Tiempo de inicio:", new Date().toISOString());
 });
