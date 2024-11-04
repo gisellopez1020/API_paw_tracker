@@ -54,14 +54,17 @@ app.post("/update-location", (req, res) => {
 
 app.get("/", (req, res) => {
   try {
+    console.log("Recibiendo petición GET en /");
+
     if (!lastLocation) {
-      console.log("No hay ubicación disponible, enviando posición por defecto");
-      return res.json({
+      const defaultLocation = {
         latitude: 4.60971,
         longitude: -74.08175,
         timestamp: new Date().toISOString(),
         receivedAt: new Date().toISOString(),
-      });
+      };
+      console.log("Enviando ubicación por defecto:", defaultLocation);
+      return res.json(defaultLocation);
     }
 
     console.log("Enviando última ubicación:", lastLocation);
