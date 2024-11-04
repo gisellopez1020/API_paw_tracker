@@ -55,8 +55,13 @@ app.post("/update-location", (req, res) => {
 app.get("/", (req, res) => {
   try {
     if (!lastLocation) {
-      console.log("No hay ubicación disponible");
-      return res.status(404).json({ error: "No hay ubicación disponible" });
+      console.log("No hay ubicación disponible, enviando posición por defecto");
+      return res.json({
+        latitude: 4.60971,
+        longitude: -74.08175,
+        timestamp: new Date().toISOString(),
+        receivedAt: new Date().toISOString(),
+      });
     }
 
     console.log("Enviando última ubicación:", lastLocation);
